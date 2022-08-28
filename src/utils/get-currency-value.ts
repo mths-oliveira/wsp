@@ -12,6 +12,6 @@ export async function getCurrencyValue(currency: Coin) {
   const url = `https://economia.awesomeapi.com.br/json/last/${abbreviation}-BRL`
   const response = await fetch(url)
   const data = await response.json()
-  const currencyValue = data[`${abbreviation}BRL`].bid
+  const currencyValue = Number(data[`${abbreviation}BRL`].bid)
   return currencyValue
 }

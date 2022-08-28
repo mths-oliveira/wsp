@@ -12,7 +12,7 @@ export default class Document extends NextDocument {
             href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap"
             rel="stylesheet"
           />
-          <title>Conversor de Moedas - Matheus Oliveira</title>
+          <link rel="icon" type="image/jpg" href="/favicon.jpg" />
         </Head>
         <body>
           <ColorModeScript initialColorMode="dark" />

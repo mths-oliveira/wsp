@@ -61,12 +61,9 @@ export default function () {
 
   useEffect(() => {
     ;(async () => {
-      const dolarValue = await getCurrencyValue("dolar")
-      const euroValue = await getCurrencyValue("euro")
-      const libraValue = await getCurrencyValue("libra")
-      currencyData.dolar.value = Number(dolarValue)
-      currencyData.euro.value = Number(euroValue)
-      currencyData.libra.value = Number(libraValue)
+      for (const coin in currencyData) {
+        currencyData[coin].value = await getCurrencyValue(coin as Coin)
+      }
     })()
   }, [])
 
@@ -294,6 +291,7 @@ export default function () {
         left="0"
         justifyContent="center"
         display={["flex", "flex", "none"]}
+        pointerEvents="none"
       >
         <RadioGroup value={`${screen}`}>
           <Radio value="0" size="xs" marginRight="0.5rem" />
