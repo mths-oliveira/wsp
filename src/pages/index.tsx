@@ -285,6 +285,7 @@ export default function () {
         bottom="1.5rem"
         left="0"
         justifyContent="center"
+        display={["flex", "flex", "none"]}
       >
         <RadioGroup value={`${screen}`}>
           <Radio value="0" size="xs" marginRight="0.5rem" />
