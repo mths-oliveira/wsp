@@ -18,6 +18,10 @@ import { capitalCase } from "../utils/capital-case"
 import { getMonth } from "../utils/get-month"
 
 const currencyData: Currency<CurrencyData> = {
+  real: {
+    simbol: "R$",
+    value: 1,
+  },
   dolar: {
     simbol: "US$",
     value: 1,
@@ -26,8 +30,8 @@ const currencyData: Currency<CurrencyData> = {
     simbol: "€",
     value: 1,
   },
-  real: {
-    simbol: "R$",
+  libra: {
+    simbol: "£",
     value: 1,
   },
 }
@@ -59,8 +63,10 @@ export default function () {
     ;(async () => {
       const dolarValue = await getCurrencyValue("dolar")
       const euroValue = await getCurrencyValue("euro")
+      const libraValue = await getCurrencyValue("libra")
       currencyData.dolar.value = Number(dolarValue)
       currencyData.euro.value = Number(euroValue)
+      currencyData.libra.value = Number(libraValue)
     })()
   }, [])
 
@@ -156,9 +162,11 @@ export default function () {
           <Stack as="form" spacing="2.25rem">
             <RadioGroup value={coin} onChange={setCoin as any}>
               <Stack spacing="1rem">
-                <Radio value="real">Real</Radio>
-                <Radio value="dolar">Dolar</Radio>
-                <Radio value="euro">Euro</Radio>
+                {Object.keys(currencyData).map((value) => (
+                  <Radio value={value} key={value}>
+                    {capitalCase(value)}
+                  </Radio>
+                ))}
               </Stack>
             </RadioGroup>
             <Stack
