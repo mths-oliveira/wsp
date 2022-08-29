@@ -1,5 +1,4 @@
-import initialProductsAndServicesValues from "../../products-and-services-values.json"
-import { useState, useEffect } from "react"
+import valuesOfProductsAndServicesPerMonth from "../../products-and-services-values.json"
 import {
   Box,
   Checkbox,
@@ -10,12 +9,13 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react"
-import { Coin, Currency, CurrencyData } from "../types"
+import { useState, useEffect } from "react"
 import { TableRow } from "../components/table-row"
-import { formatCurrency } from "../utils/format-currency"
+import { Coin, Currency, CurrencyData } from "../types"
 import { getCurrencyValue } from "../utils/get-currency-value"
 import { capitalCase } from "../utils/capital-case"
 import { getMonth } from "../utils/get-month"
+import { TableData } from "../components/table-data"
 
 const currencyData: Currency<CurrencyData> = {
   real: {
@@ -42,90 +42,74 @@ const initialSelectedProducts = {
   live: false,
   mp_live: false,
 }
-const initialValuesPerMonth = Array(3).fill(
-  initialProductsAndServicesValues.wol.monthlyPayment
+
+const initialValuesOfProductsAndServicesPerMonth = Array(3).fill(
+  valuesOfProductsAndServicesPerMonth.wol.monthlyPayment
 )
 
+const { live, wol } = valuesOfProductsAndServicesPerMonth
+
 export default function () {
+  const [screenNumber, setScreenNumber] = useState(0)
   const [coin, setCoin] = useState<Coin>("real")
-  const [valuesPerMonth, setValuesPerMonth] = useState<number[]>(
-    initialValuesPerMonth
-  )
   const [selectedProducts, setSelectedProducts] = useState(
     initialSelectedProducts
   )
-  const [productsAndServicesValues, setProductsAndServicesValues] = useState(
-    initialProductsAndServicesValues
-  )
-  const [screen, setScreen] = useState<0 | 1>(0)
-
-  useEffect(() => {
-    ;(async () => {
-      for (const coin in currencyData) {
-        currencyData[coin].value = await getCurrencyValue(coin as Coin)
-      }
-    })()
-  }, [])
-
-  useEffect(() => {
-    const { live, wol } = initialProductsAndServicesValues
+  const [
+    valuesOfProductsAndServicesPerMonth,
+    setValuesOfProductsAndServicesPerMonth,
+  ] = useState(initialValuesOfProductsAndServicesPerMonth)
+  function convertCurrencyValue(value: number) {
     const currencyValue = currencyData[coin].value
-    setProductsAndServicesValues({
-      live: {
-        enrolmentFee: live.enrolmentFee / currencyValue,
-        monthlyPayment: live.monthlyPayment / currencyValue,
-        mp: {
-          enrolmentFee: live.mp.enrolmentFee / currencyValue,
-          monthlyPayment: live.mp.monthlyPayment / currencyValue,
-        },
-      },
-      wol: {
-        monthlyPayment: wol.monthlyPayment / currencyValue,
-        mp: {
-          monthlyPayment: wol.mp.monthlyPayment / currencyValue,
-        },
-      },
-    })
-  }, [coin])
-
+    return value / currencyValue
+  }
+  function formatCurrency(value: number) {
+    const valueFormated = value.toFixed(2).replace(".", ",")
+    const { simbol } = currencyData[coin]
+    return `${simbol} ${valueFormated}`
+  }
   useEffect(() => {
-    const { live, wol } = productsAndServicesValues
-    const productsAndServicesValuesPerMonth = {
-      live: [live.enrolmentFee, 0, live.monthlyPayment],
-      mp_live: [live.mp.enrolmentFee, 0, live.mp.monthlyPayment],
-      wol: Array(3).fill(wol.monthlyPayment),
-      mp_wol: Array(3).fill(wol.mp.monthlyPayment),
+    for (const coin in currencyData) {
+      getCurrencyValue(coin as Coin).then((value) => {
+        currencyData[coin].value = value
+      })
     }
-    const valuesPerMonth = Array(3).fill(0)
-    for (const selectedProduct in selectedProducts) {
-      if (selectedProducts[selectedProduct]) {
-        productsAndServicesValuesPerMonth[selectedProduct].forEach(
-          (value, i) => {
-            valuesPerMonth[i] += value
-          }
-        )
+  }, [])
+  useEffect(() => {
+    const valuesOfProductsAndServicesPerMonth = [
+      ...initialValuesOfProductsAndServicesPerMonth,
+    ]
+    if (selectedProducts.live) {
+      valuesOfProductsAndServicesPerMonth[0] += live.enrolmentFee
+      valuesOfProductsAndServicesPerMonth[2] += live.monthlyPayment
+    }
+    if (selectedProducts.mp_live) {
+      valuesOfProductsAndServicesPerMonth[0] += live.mp.enrolmentFee
+      valuesOfProductsAndServicesPerMonth[2] += live.mp.monthlyPayment
+    }
+    if (selectedProducts.mp_wol) {
+      for (const i in valuesOfProductsAndServicesPerMonth) {
+        valuesOfProductsAndServicesPerMonth[i] += wol.mp.monthlyPayment
       }
     }
-    setValuesPerMonth(valuesPerMonth)
-  }, [selectedProducts, productsAndServicesValues])
-
+    setValuesOfProductsAndServicesPerMonth(valuesOfProductsAndServicesPerMonth)
+  }, [selectedProducts])
   return (
     <>
       <Flex
+        bg="gray.dark"
+        overflowX="auto"
+        scrollSnapType="x mandatory"
         flexDir={{
           md: "column",
         }}
         paddingX={{
           md: "15rem",
         }}
-        minHeight="100vh"
-        bg="gray.dark"
-        overflowX="auto"
-        scrollSnapType="x mandatory"
         sx={{
           "&>div": {
             width: "100%",
-            height: "100%",
+            minHeight: ["100vh", "100vh", "initial"],
             flexShrink: 0,
             scrollSnapAlign: "start",
           },
@@ -133,8 +117,8 @@ export default function () {
         onScroll={(e) => {
           const screen = e.currentTarget.childNodes[1] as HTMLDivElement
           const { width, left } = screen.getBoundingClientRect()
-          const isSecondScreen = width / 2 > left
-          setScreen(isSecondScreen ? 1 : 0)
+          const screenNumber = width / 2 > left ? 1 : 0
+          setScreenNumber(screenNumber)
         }}
       >
         <Flex flexDir="column" paddingX="1rem">
@@ -146,12 +130,11 @@ export default function () {
             justifyContent="space-between"
             textAlign="center"
           >
-            {valuesPerMonth.map((value, i) => (
-              <Stack key={`${i}$8&44gF`}>
+            {valuesOfProductsAndServicesPerMonth.map((value, i) => (
+              <Stack key={`value-of-product-${i}`}>
                 <Text>{capitalCase(getMonth(i))}</Text>
                 <Text fontWeight="bold">
-                  {currencyData[coin].simbol + " "}
-                  {formatCurrency(value)}
+                  {formatCurrency(convertCurrencyValue(value))}
                 </Text>
               </Stack>
             ))}
@@ -159,11 +142,10 @@ export default function () {
           <Stack as="form" spacing="2.25rem">
             <RadioGroup value={coin} onChange={setCoin as any}>
               <Stack spacing="1rem">
-                {Object.keys(currencyData).map((value) => (
-                  <Radio value={value} key={value}>
-                    {capitalCase(value)}
-                  </Radio>
-                ))}
+                <Radio value="real">Real</Radio>
+                <Radio value="dolar">Dolar</Radio>
+                <Radio value="euro">Euro</Radio>
+                <Radio value="libra">Libra</Radio>
               </Stack>
             </RadioGroup>
             <Stack
@@ -177,22 +159,20 @@ export default function () {
               onChange={(e) => {
                 const input = e.target as HTMLInputElement
                 if (input.value === "wol") return
-                setSelectedProducts((selectedProducts) => {
-                  selectedProducts[input.value] = input.checked
-                  if (!selectedProducts.live || !selectedProducts.mp_wol)
-                    selectedProducts.mp_live = false
-                  return {
-                    ...selectedProducts,
-                  }
-                })
+                const data = {
+                  ...selectedProducts,
+                  [input.value]: input.checked,
+                }
+                if (!data.mp_wol || !data.live) data.mp_live = false
+                setSelectedProducts(data)
               }}
             >
               <Checkbox
                 value="strike"
                 isChecked={Object.values(selectedProducts).every(Boolean)}
                 onChange={(e) => {
-                  const input = e.target as HTMLInputElement
                   e.stopPropagation()
+                  const input = e.target as HTMLInputElement
                   setSelectedProducts({
                     wol: true,
                     mp_wol: input.checked,
@@ -230,74 +210,68 @@ export default function () {
           <Flex
             display="table"
             height="fit-content"
-            flexGrow={1}
             marginBottom={{
               md: "5rem",
             }}
           >
             <TableRow>
               <Box>WOL</Box>
-              <Box>{currencyData[coin].simbol}</Box>
-              <Box>
-                {formatCurrency(productsAndServicesValues.wol.monthlyPayment)}
-              </Box>
+              <TableData>
+                {formatCurrency(convertCurrencyValue(wol.monthlyPayment))}
+              </TableData>
             </TableRow>
             <TableRow>
               <Box>MP WOL</Box>
-              <Box>{currencyData[coin].simbol}</Box>
-              <Box>
-                {formatCurrency(
-                  productsAndServicesValues.wol.mp.monthlyPayment
-                )}
-              </Box>
+              <TableData>
+                {formatCurrency(convertCurrencyValue(wol.mp.monthlyPayment))}
+              </TableData>
             </TableRow>
             <TableRow>
               <Box>LIVE - Matrícula</Box>
-              <Box>{currencyData[coin].simbol}</Box>
-              <Box>
-                {formatCurrency(productsAndServicesValues.live.enrolmentFee)}
-              </Box>
+              <TableData>
+                {formatCurrency(convertCurrencyValue(live.enrolmentFee))}
+              </TableData>
             </TableRow>
             <TableRow>
               <Box>LIVE - Mensalidade</Box>
-              <Box>{currencyData[coin].simbol}</Box>
-              <Box>
-                {formatCurrency(productsAndServicesValues.live.monthlyPayment)}
-              </Box>
+              <TableData>
+                {formatCurrency(convertCurrencyValue(live.monthlyPayment))}
+              </TableData>
             </TableRow>
             <TableRow>
               <Box>MP LIVE - Matrícula</Box>
-              <Box>{currencyData[coin].simbol}</Box>
-              <Box>
-                {formatCurrency(productsAndServicesValues.live.mp.enrolmentFee)}
-              </Box>
+              <TableData>
+                {formatCurrency(convertCurrencyValue(live.mp.enrolmentFee))}
+              </TableData>
             </TableRow>
             <TableRow>
               <Box>MP LIVE - Mensalidade</Box>
-              <Box>{currencyData[coin].simbol}</Box>
-              <Box>
-                {formatCurrency(
-                  productsAndServicesValues.live.mp.monthlyPayment
-                )}
-              </Box>
+              <TableData>
+                {formatCurrency(convertCurrencyValue(live.mp.monthlyPayment))}
+              </TableData>
             </TableRow>
           </Flex>
         </Flex>
       </Flex>
-      <Flex
-        width="100%"
-        position="fixed"
-        bottom="1.5rem"
-        left="0"
-        justifyContent="center"
-        display={["flex", "flex", "none"]}
+      <RadioGroup
+        value={screenNumber}
         pointerEvents="none"
+        display={{
+          md: "none",
+        }}
       >
-        <RadioGroup value={`${screen}`}>
-          <Radio value="0" size="xs" marginRight="0.5rem" />
-          <Radio value="1" size="xs" />
-        </RadioGroup>
-      </Flex>
+        <Stack
+          direction="row"
+          width="100vw"
+          justifyContent="center"
+          position="fixed"
+          bottom="2.25rem"
+          left="0"
+        >
+          <Radio value={0} size="xs" />
+          <Radio value={1} size="xs" />
+        </Stack>
+      </RadioGroup>
     </>
   )
 }

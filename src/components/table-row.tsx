@@ -16,13 +16,11 @@ export function TableRow({ children, ...rest }: BoxProps) {
           width: "100%",
           paddingX: "1rem",
         },
-        "&>div:not(:first-child)": {
-          fontWeight: "bold",
-        },
+
         "&>div:last-child": {
           paddingRight: "1rem",
           paddingLeft: "0.25rem",
-          textAlign: "end",
+          fontWeight: "bold",
         },
       }}
       {...rest}

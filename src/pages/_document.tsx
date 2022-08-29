@@ -12,7 +12,11 @@ export default class Document extends NextDocument {
             href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap"
             rel="stylesheet"
           />
-          <link rel="icon" type="image/jpg" href="/favicon.jpg" />
+          <link
+            rel="icon"
+            type="image/jpg"
+            href="https://res.cloudinary.com/redfuel/image/upload/v1652875763/wsp/users/48f760be-ad6f-4b24-8513-9d1e492bbef8/team_photos/hc4tj8zkmf5syvx41zca.jpg"
+          />
         </Head>
         <body>
           <ColorModeScript initialColorMode="dark" />
