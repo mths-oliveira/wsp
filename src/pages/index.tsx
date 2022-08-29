@@ -16,7 +16,9 @@ import { getCurrencyValue } from "../utils/get-currency-value"
 import { capitalCase } from "../utils/capital-case"
 import { getMonth } from "../utils/get-month"
 import { TableData } from "../components/table-data"
+import { ScreenMarker } from "../components/screen-marker"
 
+const { live, wol } = valuesOfProductsAndServicesPerMonth
 const currencyData: Currency<CurrencyData> = {
   real: {
     simbol: "R$",
@@ -35,30 +37,36 @@ const currencyData: Currency<CurrencyData> = {
     value: 1,
   },
 }
-
 const initialSelectedProducts = {
   wol: true,
   mp_wol: false,
   live: false,
   mp_live: false,
 }
-
 const initialValuesOfProductsAndServicesPerMonth = Array(3).fill(
-  valuesOfProductsAndServicesPerMonth.wol.monthlyPayment
+  wol.monthlyPayment
 )
-
-const { live, wol } = valuesOfProductsAndServicesPerMonth
-
 export default function () {
-  const [screenNumber, setScreenNumber] = useState(0)
   const [coin, setCoin] = useState<Coin>("real")
   const [selectedProducts, setSelectedProducts] = useState(
     initialSelectedProducts
   )
-  const [
-    valuesOfProductsAndServicesPerMonth,
-    setValuesOfProductsAndServicesPerMonth,
-  ] = useState(initialValuesOfProductsAndServicesPerMonth)
+  const valuesOfProductsAndServicesPerMonth = [
+    ...initialValuesOfProductsAndServicesPerMonth,
+  ]
+  if (selectedProducts.live) {
+    valuesOfProductsAndServicesPerMonth[0] += live.enrolmentFee
+    valuesOfProductsAndServicesPerMonth[2] += live.monthlyPayment
+  }
+  if (selectedProducts.mp_live) {
+    valuesOfProductsAndServicesPerMonth[0] += live.mp.enrolmentFee
+    valuesOfProductsAndServicesPerMonth[2] += live.mp.monthlyPayment
+  }
+  if (selectedProducts.mp_wol) {
+    for (const i in valuesOfProductsAndServicesPerMonth) {
+      valuesOfProductsAndServicesPerMonth[i] += wol.mp.monthlyPayment
+    }
+  }
   function convertCurrencyValue(value: number) {
     const currencyValue = currencyData[coin].value
     return value / currencyValue
@@ -75,28 +83,10 @@ export default function () {
       })
     }
   }, [])
-  useEffect(() => {
-    const valuesOfProductsAndServicesPerMonth = [
-      ...initialValuesOfProductsAndServicesPerMonth,
-    ]
-    if (selectedProducts.live) {
-      valuesOfProductsAndServicesPerMonth[0] += live.enrolmentFee
-      valuesOfProductsAndServicesPerMonth[2] += live.monthlyPayment
-    }
-    if (selectedProducts.mp_live) {
-      valuesOfProductsAndServicesPerMonth[0] += live.mp.enrolmentFee
-      valuesOfProductsAndServicesPerMonth[2] += live.mp.monthlyPayment
-    }
-    if (selectedProducts.mp_wol) {
-      for (const i in valuesOfProductsAndServicesPerMonth) {
-        valuesOfProductsAndServicesPerMonth[i] += wol.mp.monthlyPayment
-      }
-    }
-    setValuesOfProductsAndServicesPerMonth(valuesOfProductsAndServicesPerMonth)
-  }, [selectedProducts])
   return (
     <>
       <Flex
+        id="wrap"
         bg="gray.dark"
         overflowX="auto"
         scrollSnapType="x mandatory"
@@ -113,12 +103,6 @@ export default function () {
             flexShrink: 0,
             scrollSnapAlign: "start",
           },
-        }}
-        onScroll={(e) => {
-          const screen = e.currentTarget.childNodes[1] as HTMLDivElement
-          const { width, left } = screen.getBoundingClientRect()
-          const screenNumber = width / 2 > left ? 1 : 0
-          setScreenNumber(screenNumber)
         }}
       >
         <Flex flexDir="column" paddingX="1rem">
@@ -253,25 +237,7 @@ export default function () {
           </Flex>
         </Flex>
       </Flex>
-      <RadioGroup
-        value={screenNumber}
-        pointerEvents="none"
-        display={{
-          md: "none",
-        }}
-      >
-        <Stack
-          direction="row"
-          width="100vw"
-          justifyContent="center"
-          position="fixed"
-          bottom="2.25rem"
-          left="0"
-        >
-          <Radio value={0} size="xs" />
-          <Radio value={1} size="xs" />
-        </Stack>
-      </RadioGroup>
+      <ScreenMarker />
     </>
   )
 }
