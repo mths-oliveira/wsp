@@ -67,6 +67,17 @@ export default function () {
       valuesOfProductsAndServicesPerMonth[i] += wol.mp.monthlyPayment
     }
   }
+  useEffect(() => {
+    updateCurrencyValues()
+    setInterval(updateCurrencyValues, 60_000)
+  }, [])
+  function updateCurrencyValues() {
+    for (const coin in currencyData) {
+      getCurrencyValue(coin as Coin).then((value) => {
+        currencyData[coin].value = value
+      })
+    }
+  }
   function convertCurrencyValue(value: number) {
     const currencyValue = currencyData[coin].value
     return value / currencyValue
@@ -76,13 +87,6 @@ export default function () {
     const { simbol } = currencyData[coin]
     return `${simbol} ${valueFormated}`
   }
-  useEffect(() => {
-    for (const coin in currencyData) {
-      getCurrencyValue(coin as Coin).then((value) => {
-        currencyData[coin].value = value
-      })
-    }
-  }, [])
   return (
     <>
       <Flex
