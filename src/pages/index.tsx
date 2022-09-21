@@ -9,7 +9,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { TableRow } from "../components/table-row"
 import { Coin, Currency, CurrencyData } from "../types"
 import { getCurrencyValue } from "../utils/get-currency-value"
@@ -17,26 +17,9 @@ import { capitalCase } from "../utils/capital-case"
 import { getMonth } from "../utils/get-month"
 import { TableData } from "../components/table-data"
 import { ScreenMarker } from "../components/screen-marker"
+import { GetServerSideProps } from "next"
 
 const { live, wol } = valuesOfProductsAndServicesPerMonth
-const currencyData: Currency<CurrencyData> = {
-  real: {
-    simbol: "R$",
-    value: 1,
-  },
-  dolar: {
-    simbol: "US$",
-    value: 1,
-  },
-  euro: {
-    simbol: "€",
-    value: 1,
-  },
-  libra: {
-    simbol: "£",
-    value: 1,
-  },
-}
 const initialSelectedProducts = {
   wol: true,
   mp_wol: false,
@@ -46,7 +29,10 @@ const initialSelectedProducts = {
 const initialValuesOfProductsAndServicesPerMonth = Array(3).fill(
   wol.monthlyPayment
 )
-export default function () {
+interface Props {
+  currencyData: Currency<CurrencyData>
+}
+export default function ({ currencyData }: Props) {
   const [coin, setCoin] = useState<Coin>("real")
   const [selectedProducts, setSelectedProducts] = useState(
     initialSelectedProducts
@@ -67,13 +53,6 @@ export default function () {
       valuesOfProductsAndServicesPerMonth[i] += wol.mp.monthlyPayment
     }
   }
-  useEffect(() => {
-    for (const coin in currencyData) {
-      getCurrencyValue(coin as Coin).then((value) => {
-        currencyData[coin].value = value
-      })
-    }
-  }, [])
   function convertCurrencyValue(value: number) {
     const currencyValue = currencyData[coin].value
     return value / currencyValue
@@ -240,4 +219,34 @@ export default function () {
       <ScreenMarker />
     </>
   )
+}
+
+export const getServerSideProps: GetServerSideProps<Props> = async () => {
+  const currencyData: Currency<CurrencyData> = {
+    real: {
+      simbol: "R$",
+      value: 1,
+    },
+    dolar: {
+      simbol: "US$",
+      value: 1,
+    },
+    euro: {
+      simbol: "€",
+      value: 1,
+    },
+    libra: {
+      simbol: "£",
+      value: 1,
+    },
+  }
+  for (const coin in currencyData) {
+    const value = await getCurrencyValue(coin as Coin)
+    currencyData[coin].value = value
+  }
+  return {
+    props: {
+      currencyData,
+    },
+  }
 }
