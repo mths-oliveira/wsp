@@ -114,14 +114,13 @@ export default function ({ currencyData }: Props) {
             <RadioGroup value={coin} onChange={setCoin as any}>
               <Stack spacing="1rem">
                 <Radio value="real">Real</Radio>
-                <Radio value="dolar">Dolar</Radio>
+                <Radio value="dolar">Dólar</Radio>
                 <Radio value="euro">Euro</Radio>
                 <Radio value="libra">Libra</Radio>
               </Stack>
             </RadioGroup>
             <Stack
               spacing="1rem"
-              textTransform="uppercase"
               sx={{
                 "label:not(:first-child)": {
                   marginLeft: "1.5rem",
@@ -155,16 +154,16 @@ export default function ({ currencyData }: Props) {
                 Strike
               </Checkbox>
               <Checkbox value="wol" isChecked={selectedProducts.wol}>
-                WOL
+                Wol
               </Checkbox>
               <Checkbox value="mp_wol" isChecked={selectedProducts.mp_wol}>
-                MP WOL
+                Multi Wol
               </Checkbox>
               <Checkbox value="live" isChecked={selectedProducts.live}>
-                LIVE
+                Live
               </Checkbox>
               <Checkbox value="mp_live" isChecked={selectedProducts.mp_live}>
-                MP LIVE
+                Multi Live
               </Checkbox>
             </Stack>
           </Stack>
