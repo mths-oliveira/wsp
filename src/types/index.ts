@@ -10,4 +10,6 @@ export interface Currency<T = any> {
 export interface CurrencyData {
   value: number
   simbol: string
+  name: string
+  code: string
 }

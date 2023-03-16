@@ -7,15 +7,22 @@ import {
   Radio,
   RadioGroup,
   Stack,
+  Table,
+  TableCaption,
+  TableContainer,
+  Tbody,
+  Td,
   Text,
+  Tfoot,
+  Th,
+  Thead,
+  Tr,
 } from "@chakra-ui/react"
 import { useState } from "react"
-import { TableRow } from "../components/table-row"
 import { Coin, Currency, CurrencyData } from "../types"
-import { getCurrencyValue } from "../utils/get-currency-value"
+
 import { capitalCase } from "../utils/capital-case"
 import { getMonth } from "../utils/get-month"
-import { TableData } from "../components/table-data"
 import { ScreenMarker } from "../components/screen-marker"
 import { GetServerSideProps } from "next"
 
@@ -67,6 +74,7 @@ export default function ({ currencyData }: Props) {
       <Flex
         id="wrap"
         bg="gray.dark"
+        color="#fff"
         overflowX="auto"
         scrollSnapType="x mandatory"
         flexDir={{
@@ -161,59 +169,115 @@ export default function ({ currencyData }: Props) {
             </Stack>
           </Stack>
         </Flex>
-        <Flex flexDirection="column">
+        <Flex
+          flexDirection="column"
+          marginBottom={{
+            sm: "5rem",
+          }}
+        >
           <Heading
-            margin="3.5rem 1rem 1.5rem"
-            marginTop={{
-              md: "5rem",
-            }}
+            fontSize="1.25rem"
+            margin="3.5rem 0 1.25rem"
+            marginLeft={["1rem", 0]}
           >
             Tabela de preços
           </Heading>
-          <Flex
-            display="table"
-            height="fit-content"
-            marginBottom={{
-              md: "5rem",
+
+          <TableContainer
+            overflow="hidden"
+            border={{
+              sm: "1px solid rgba(255,255,255,0.1)",
             }}
+            padding={{
+              sm: "1rem",
+            }}
+            borderRadius="md"
           >
-            <TableRow>
-              <Box>WOL</Box>
-              <TableData>
-                {formatCurrency(convertCurrencyValue(wol.monthlyPayment))}
-              </TableData>
-            </TableRow>
-            <TableRow>
-              <Box>MP WOL</Box>
-              <TableData>
-                {formatCurrency(convertCurrencyValue(wol.mp.monthlyPayment))}
-              </TableData>
-            </TableRow>
-            <TableRow>
-              <Box>LIVE - Matrícula</Box>
-              <TableData>
-                {formatCurrency(convertCurrencyValue(live.enrolmentFee))}
-              </TableData>
-            </TableRow>
-            <TableRow>
-              <Box>LIVE - Mensalidade</Box>
-              <TableData>
-                {formatCurrency(convertCurrencyValue(live.monthlyPayment))}
-              </TableData>
-            </TableRow>
-            <TableRow>
-              <Box>MP LIVE - Matrícula</Box>
-              <TableData>
-                {formatCurrency(convertCurrencyValue(live.mp.enrolmentFee))}
-              </TableData>
-            </TableRow>
-            <TableRow>
-              <Box>MP LIVE - Mensalidade</Box>
-              <TableData>
-                {formatCurrency(convertCurrencyValue(live.mp.monthlyPayment))}
-              </TableData>
-            </TableRow>
-          </Flex>
+            <Table
+              variant="simple"
+              sx={{
+                ">*>tr>*": {
+                  borderBottom: "1px solid rgba(255,255,255,0.1)",
+                  padding: ["1rem", "1rem 1.5rem"],
+                },
+                ">tbody>tr>td": {
+                  "&:nth-child(2)": {
+                    width: "100%",
+                  },
+                  "&:last-of-type": {
+                    textAlignLast: "justify",
+                    fontWeight: "bold",
+                  },
+                },
+              }}
+            >
+              <TableCaption>
+                Valores convertidos em {currencyData[coin].name}
+              </TableCaption>
+              <Thead>
+                <Tr>
+                  <Th>Produto</Th>
+                  <Th>Pagamento</Th>
+                  <Th isNumeric>Valor</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                <Tr>
+                  <Td>Wol</Td>
+                  <Td>Mensalidade</Td>
+                  <Td isNumeric>
+                    {formatCurrency(convertCurrencyValue(wol.monthlyPayment))}
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Multi Wol</Td>
+                  <Td>Mensalidade</Td>
+                  <Td isNumeric>
+                    {formatCurrency(
+                      convertCurrencyValue(wol.mp.monthlyPayment)
+                    )}
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Live</Td>
+                  <Td>Matrícula</Td>
+                  <Td isNumeric>
+                    {formatCurrency(convertCurrencyValue(live.enrolmentFee))}
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Live</Td>
+                  <Td>Mensalidade</Td>
+                  <Td isNumeric>
+                    {formatCurrency(convertCurrencyValue(live.monthlyPayment))}
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Multi Live</Td>
+                  <Td>Matrícula</Td>
+                  <Td isNumeric>
+                    {formatCurrency(convertCurrencyValue(live.mp.enrolmentFee))}
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Multi Live</Td>
+                  <Td>Mensalidade</Td>
+                  <Td isNumeric>
+                    {formatCurrency(
+                      convertCurrencyValue(live.mp.monthlyPayment)
+                    )}
+                  </Td>
+                </Tr>
+              </Tbody>
+              <Tfoot>
+                <Tr>
+                  <Th>Produto</Th>
+                  <Th>Pagamento</Th>
+                  <Th isNumeric>Valor</Th>
+                </Tr>
+              </Tfoot>
+            </Table>
+          </TableContainer>
         </Flex>
       </Flex>
       <ScreenMarker />
@@ -222,31 +286,48 @@ export default function ({ currencyData }: Props) {
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
-  const currencyData: Currency<CurrencyData> = {
-    real: {
-      simbol: "R$",
-      value: 1,
-    },
+  const currencyData = {
     dolar: {
-      simbol: "US$",
+      simbol: "$",
+      code: "USD",
       value: 1,
+      name: "Dólares americanos",
     },
     euro: {
       simbol: "€",
+      code: "EUR",
       value: 1,
+      name: "Euros",
     },
     libra: {
       simbol: "£",
+      code: "GBP",
       value: 1,
+      name: "Libras esterlinas",
     },
   }
+  let url = "https://economia.awesomeapi.com.br/last/"
   for (const coin in currencyData) {
-    const value = await getCurrencyValue(coin as Coin)
-    currencyData[coin].value = value
+    const { code } = currencyData[coin]
+    url += `${code}-BRL${code !== "GBP" ? "," : ""}`
+  }
+  const response = await fetch(url)
+  const data = await response.json()
+  for (const coin in currencyData) {
+    const { code } = currencyData[coin]
+    currencyData[coin].value = Number(data[`${code}BRL`].bid)
   }
   return {
     props: {
-      currencyData,
+      currencyData: {
+        real: {
+          simbol: "R$",
+          code: "BRL",
+          value: 1,
+          name: "Reais",
+        },
+        ...currencyData,
+      },
     },
   }
 }
