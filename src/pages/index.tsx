@@ -122,7 +122,7 @@ export default function ({ currencyData }: Props) {
             <Stack
               spacing="1rem"
               sx={{
-                "label:not(:first-child)": {
+                "label:not(:first-of-type)": {
                   marginLeft: "1.5rem",
                 },
               }}
@@ -200,7 +200,7 @@ export default function ({ currencyData }: Props) {
                   padding: ["1rem", "1rem 1.5rem"],
                 },
                 ">tbody>tr>td": {
-                  "&:nth-child(2)": {
+                  "&:nth-of-type(2)": {
                     width: "100%",
                   },
                   "&:last-of-type": {
