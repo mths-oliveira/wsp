@@ -176,7 +176,8 @@ export default function ({ currencyData }: Props) {
         >
           <Heading
             fontSize="1.25rem"
-            margin="3.5rem 0 1.25rem"
+            marginTop={["3.5rem", "4.5rem"]}
+            marginBottom="1.25rem"
             marginLeft={["1rem", 0]}
           >
             Tabela de preços
