@@ -33,9 +33,7 @@ const initialSelectedProducts = {
   live: false,
   mp_live: false,
 }
-const initialValuesOfProductsAndServicesPerMonth = Array(3).fill(
-  wol.monthlyPayment
-)
+const initialValuesOfProductsAndServicesPerMonth = Array(3).fill(0)
 interface Props {
   currencyData: Currency<CurrencyData>
 }
@@ -47,6 +45,16 @@ export default function ({ currencyData }: Props) {
   const valuesOfProductsAndServicesPerMonth = [
     ...initialValuesOfProductsAndServicesPerMonth,
   ]
+  if (selectedProducts.wol) {
+    for (const i in valuesOfProductsAndServicesPerMonth) {
+      valuesOfProductsAndServicesPerMonth[i] += wol.monthlyPayment
+    }
+  }
+  if (selectedProducts.mp_wol) {
+    for (const i in valuesOfProductsAndServicesPerMonth) {
+      valuesOfProductsAndServicesPerMonth[i] += wol.mp.monthlyPayment
+    }
+  }
   if (selectedProducts.live) {
     valuesOfProductsAndServicesPerMonth[0] += live.enrolmentFee
     valuesOfProductsAndServicesPerMonth[2] += live.monthlyPayment
@@ -55,11 +63,7 @@ export default function ({ currencyData }: Props) {
     valuesOfProductsAndServicesPerMonth[0] += live.mp.enrolmentFee
     valuesOfProductsAndServicesPerMonth[2] += live.mp.monthlyPayment
   }
-  if (selectedProducts.mp_wol) {
-    for (const i in valuesOfProductsAndServicesPerMonth) {
-      valuesOfProductsAndServicesPerMonth[i] += wol.mp.monthlyPayment
-    }
-  }
+
   function convertCurrencyValue(value: number) {
     const currencyValue = currencyData[coin].value
     return value / currencyValue
@@ -128,12 +132,10 @@ export default function ({ currencyData }: Props) {
               }}
               onChange={(e) => {
                 const input = e.target as HTMLInputElement
-                if (input.value === "wol") return
                 const data = {
                   ...selectedProducts,
                   [input.value]: input.checked,
                 }
-                if (!data.mp_wol || !data.live) data.mp_live = false
                 setSelectedProducts(data)
               }}
             >
@@ -144,7 +146,7 @@ export default function ({ currencyData }: Props) {
                   e.stopPropagation()
                   const input = e.target as HTMLInputElement
                   setSelectedProducts({
-                    wol: true,
+                    wol: input.checked,
                     mp_wol: input.checked,
                     live: input.checked,
                     mp_live: input.checked,
